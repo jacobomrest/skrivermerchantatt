@@ -10,6 +10,12 @@ final headers = [
   {'value': 'Rule Name'},
 ];
 
+final dropDownOptions = [
+  'Any',
+  'USD',
+  'EUR',
+];
+
   List<double> chartValues = [
     4.40,
     3.30,
@@ -30,7 +36,7 @@ final tableData = [
     "card": "4616",
     "caseAmount": 200.1,
     "currency": "123456",
-    "paymentType": "USD",
+    "paymentType": "EUR",
     "reasonCode": "10.4",
     "status": "Accepted",
     "statusCode": "103",
@@ -45,6 +51,17 @@ final tableData = [
     "reasonCode": "100.5",
     "status": "Declined",
     "statusCode": "102",
+    "ruleType": "AMOUNT",
+    "ruleName": "Accept A."
+  },
+  {
+    "card": "4242",
+    "caseAmount": 110.99,
+    "currency": "345678",
+    "paymentType": "EUR",
+    "reasonCode": "10.6",
+    "status": "Accepted",
+    "statusCode": "103",
     "ruleType": "AMOUNT",
     "ruleName": "Accept A."
   },

@@ -3,11 +3,11 @@ import 'package:flutter_table/src/widgets/chart/bar_graph.dart';
 import 'package:flutter_table/src/widgets/tables/table_data.dart';
 
 class CustomTable extends StatefulWidget {
-  final List<Map<String, dynamic>> dataTable;
+  List<Map<String, dynamic>> dataTable;
   final List<Map<String, String>> headers;
   final List chartValues;
 
-  const CustomTable({
+  CustomTable({
     super.key,
     required this.dataTable,
     required this.headers,
@@ -22,18 +22,41 @@ class _CustomTableState extends State<CustomTable> {
   // double screenWidth = MediaQuery.of(context).size.width;
   bool isAscendant = false;
 
-  void updateParentState() {
-    print(isAscendant);
+  String? _selectedValue;
+
+  List<Map<String, dynamic>>? originalDataTable;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedValue = dropDownOptions[0];
+    originalDataTable = widget.dataTable.toList();
+  }
+
+  void handleSort() {
     setState(() {
       isAscendant = !isAscendant;
       if (isAscendant) {
-        widget.dataTable
-            .sort((a, b) => '${a['caseAmount']}'.compareTo('${b['caseAmount']}'));
+        widget.dataTable.sort(
+            (a, b) => '${a['caseAmount']}'.compareTo('${b['caseAmount']}'));
       } else {
-        widget.dataTable
-            .sort((a, b) => '${b['caseAmount']}'.compareTo('${a['caseAmount']}'));
+        widget.dataTable.sort(
+            (a, b) => '${b['caseAmount']}'.compareTo('${a['caseAmount']}'));
       }
     });
+  }
+
+  void handleFilter() {
+    if (_selectedValue == 'USD') {
+      widget.dataTable = originalDataTable!
+          .where((value) => value['paymentType'] == 'USD')
+          .toList();
+    } else if (_selectedValue == 'EUR') {
+      widget.dataTable = originalDataTable!.where((value) => value['paymentType'] == 'EUR')
+          .toList();
+    } else {
+      widget.dataTable = originalDataTable!;
+    }
   }
 
   @override
@@ -61,7 +84,7 @@ class _CustomTableState extends State<CustomTable> {
                 ),
                 SizedBox(
                     height: 200,
-                    width: 450,
+                    width: MediaQuery.of(context).size.width * 0.30,
                     child: MyBarGraph(
                       chartValues: widget.chartValues,
                     ))
@@ -70,12 +93,39 @@ class _CustomTableState extends State<CustomTable> {
             const SizedBox(
               height: 35,
             ),
-            const Align(
+            Align(
               alignment: Alignment.topLeft,
               child: Column(
                 children: [
-                  Text('RDR Reports', style: _customTitleTextStyle),
-                  SizedBox(height: 15),
+                  Row(
+                    children: [
+                      const Text('RDR Reports', style: _customTitleTextStyle),
+                      const SizedBox(
+                        height: 15,
+                        width: 20,
+                      ),
+                      DropdownButton<String>(
+                        value: _selectedValue,
+                        style: _customHeaderTextStyle,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        dropdownColor: Colors.cyan,
+                        items: dropDownOptions
+                            .map((item) => DropdownMenuItem(
+                                value: item, child: Text(item)))
+                            .toList(),
+                        onChanged: (String? value) {
+                          setState(() {
+                            _selectedValue = value;
+                            handleFilter();
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  )
                 ],
               ),
             ),
@@ -84,7 +134,7 @@ class _CustomTableState extends State<CustomTable> {
                 final index = headers.indexOf(header);
 
                 return HeaderCell(
-                  callback: updateParentState,
+                  callback: handleSort,
                   headerInfo: header,
                   index: index,
                   dataTable: widget.dataTable,
@@ -123,7 +173,7 @@ class _HeaderCellState extends State<HeaderCell> {
   Widget build(BuildContext context) {
     return Container(
       height: 45,
-      width: 150,
+      width: MediaQuery.of(context).size.width * 0.1,
       decoration: const BoxDecoration(
         border: Border(
             bottom: BorderSide(color: Colors.black, width: 2),
@@ -132,16 +182,19 @@ class _HeaderCellState extends State<HeaderCell> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            widget.headerInfo['value'] ?? '',
-            style: _customHeaderTextStyle,
+          Expanded(
+            child: Text(
+              widget.headerInfo['value'] ?? '',
+              style: _customHeaderTextStyle,
+              overflow: TextOverflow.visible,
+            ),
           ),
           if (widget.index == 1)
             IconButton(
                 onPressed: () {
                   widget.callback();
                 },
-                icon: const Icon(Icons.sort_outlined))
+                icon: const Icon(Icons.sort_outlined)),
         ],
       ),
     );
@@ -213,7 +266,7 @@ class SingleCell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 40,
-      width: 150,
+      width: MediaQuery.of(context).size.width * 0.1,
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
@@ -223,9 +276,12 @@ class SingleCell extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            rowInfo,
-            style: _cellTextStyle,
+          Expanded(
+            child: Text(
+              rowInfo,
+              style: _cellTextStyle,
+              overflow: TextOverflow.visible,
+            ),
           ),
         ],
       ),
@@ -234,10 +290,11 @@ class SingleCell extends StatelessWidget {
 }
 
 const TextStyle _customHeaderTextStyle = TextStyle(
-    fontWeight: FontWeight.w600,
-    fontSize: 14,
-    color: Colors.black,
-    decoration: TextDecoration.none);
+  fontWeight: FontWeight.w600,
+  fontSize: 12,
+  color: Colors.black,
+  decoration: TextDecoration.none,
+);
 
 const TextStyle _customTitleTextStyle = TextStyle(
     fontWeight: FontWeight.w600,
@@ -246,7 +303,8 @@ const TextStyle _customTitleTextStyle = TextStyle(
     decoration: TextDecoration.none);
 
 const TextStyle _cellTextStyle = TextStyle(
-    fontWeight: FontWeight.w400,
-    fontSize: 12,
-    color: Colors.black,
-    decoration: TextDecoration.none);
+  fontWeight: FontWeight.w400,
+  fontSize: 12,
+  color: Colors.black,
+  decoration: TextDecoration.none,
+);
