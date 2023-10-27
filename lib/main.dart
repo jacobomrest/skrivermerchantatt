@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_table/src/components/tables/table.dart';
-import 'package:flutter_table/src/components/tables/table_data.dart';
+import 'package:flutter_table/src/widgets/tables/table.dart';
+import 'package:flutter_table/src/widgets/tables/table_data.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  MyApp({super.key});
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +27,7 @@ class MyApp extends StatelessWidget {
         home: CustomTable(
           dataTable: tableData,
           headers: headers,
-          types: types,
+          chartValues: chartValues,
         ));
   }
 }
